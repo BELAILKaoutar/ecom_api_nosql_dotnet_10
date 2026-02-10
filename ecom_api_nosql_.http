@@ -1,0 +1,6 @@
+@ecom_api_nosql__HostAddress = http://localhost:5071
+
+GET {{ecom_api_nosql__HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
