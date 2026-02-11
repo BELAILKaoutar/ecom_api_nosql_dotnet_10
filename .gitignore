@@ -3,3 +3,27 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Dotnet
+*.dll
+*.exe
+*.pdb
+
+# Logs
+*.log
+
+# Secrets
+appsettings.Development.json

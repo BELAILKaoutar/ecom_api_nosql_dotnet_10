@@ -5,52 +5,56 @@ using ecom_api_nosql_.Services;
 using ecom_api_nosql_.Services.Interface;
 using ecom_api_nosql_.Settings;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Configure MongoDB settings
+// MongoDB config
 builder.Services.Configure<MongoDbConfiguration>(
     builder.Configuration.GetSection("MongoDBConfiguration"));
 
-// Register MongoDB client factory
+// Mongo client
 builder.Services.AddSingleton<IMongoClientFactory, MongoClientFactory>();
 
-// Register repositories
+// Repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-// Register services
+// Services
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
-// Register seeders
+// Seeder
 builder.Services.AddScoped<ProductSeeder>();
-
-// Add controllers
+builder.Services.AddScoped<CustomerSeeder>();
+builder.Services.AddScoped<OrderSeeder>();
+// Controllers
 builder.Services.AddControllers();
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-// Add endpoint explorer for OpenAPI
+    
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Seed database
+// Seed DB
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<ProductSeeder>();
     await seeder.SeedAsync();
 }
 
-// Configure the HTTP request pipeline.
+// Pipeline
+// Pipeline'
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 
-// Map controllers
 app.MapControllers();
 
 app.Run();

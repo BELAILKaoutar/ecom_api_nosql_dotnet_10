@@ -1,4 +1,4 @@
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace ecom_api_nosql_.Models;
@@ -6,6 +6,9 @@ namespace ecom_api_nosql_.Models;
 /// <summary>
 /// Product entity class representing a product in the MongoDB collection
 /// </summary>
+///    
+[BsonIgnoreExtraElements] // ← ça ignore les champs supplémentaires
+
 public class Product
 {
     /// <summary>
@@ -56,11 +59,14 @@ public class Product
     /// </summary>
     [BsonElement("date_ajout")]
     public DateTime DateAjout { get; set; }
+
+
 }
 
 /// <summary>
 /// Product specifications class
 /// </summary>
+[BsonIgnoreExtraElements]   
 public class ProductSpecifications
 {
     /// <summary>
@@ -80,4 +86,6 @@ public class ProductSpecifications
     /// </summary>
     [BsonElement("stockage")]
     public string? Stockage { get; set; }
+
+
 }
