@@ -1,37 +1,41 @@
-Ecom API NoSQL .NET
+# **Ecom API NoSQL .NET**
 
-Ecom API NoSQL .NET est une API RESTful développée avec .NET 10, utilisant MongoDB comme base de données NoSQL. Ce mini-projet permet de gérer les clients et leurs commandes pour une application e-commerce simplifiée.
+**Ecom API NoSQL .NET** est une API RESTful développée avec **.NET 10** et utilisant **MongoDB** comme base de données NoSQL. Ce mini-projet permet de gérer les clients et leurs commandes pour une application e-commerce simplifiée.
 
-🔹 Fonctionnalités principales
+---
 
-Gestion des clients :
+## **Fonctionnalités principales**
 
-Création, lecture, mise à jour et suppression de clients.
+### **Gestion des clients**
+- Création, lecture, mise à jour et suppression de clients.
+- Stockage d’informations détaillées : **nom**, **prénom**, **email**, **téléphone**, **adresse**.
 
-Stockage d’informations détaillées comme nom, prénom, email, téléphone et adresse.
+### **Gestion des commandes**
+- Création et lecture des commandes associées à chaque client.
+- Suivi du **statut**, des **articles commandés**, du **montant total** et de l’**adresse de livraison**.
 
-Gestion des commandes :
+### **Architecture et technologies**
+- **Backend** : .NET 10
+- **Base de données** : MongoDB (NoSQL)
+- **Documentation API** : Swagger
+- **Architecture** : Services et Repository Pattern pour un code structuré et maintenable
 
-Création et lecture des commandes associées à chaque client.
+### **Endpoints exposés**
+- **Clients** : `/api/Customers`
+- **Commandes** : `/api/Orders`
 
-Suivi du statut, des articles commandés, du montant total et de l’adresse de livraison.
+---
 
-Architecture et technologies :
+## **Objectif du projet**
+Ce projet a pour objectif de démontrer :  
+- Comment construire une API e-commerce légère avec **.NET 10**.  
+- L’intégration entre **.NET** et **MongoDB**.  
+- L’utilisation de **Swagger** pour documenter et tester les endpoints.  
+- La mise en place d’une architecture propre avec **services** et **repository**.
 
-.NET 10 pour le backend.
+---
 
-MongoDB comme base NoSQL pour la persistance des données.
-
-Swagger pour la documentation et le test des endpoints.
-
-Services et repository pattern pour une architecture claire et maintenable.
-
-Endpoints exposés via API REST :
-
-/api/Customers pour gérer les clients.
-
-/api/Orders pour gérer les commandes.
-
-🔹 Objectif
-
-Ce projet est conçu pour illustrer comment construire une API e-commerce légère, avec un backend structuré et une persistance NoSQL. Il sert également de base pour apprendre l’intégration entre .NET et MongoDB, la mise en place de services, et l’utilisation de Swagger pour tester les API.
+## **Comment tester l’API**
+1. Cloner le projet :  
+   ```bash
+   git clone https://github.com/BELAILKaoutar/ecom_api_nosql_dotnet_10.git
