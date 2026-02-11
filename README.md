@@ -40,3 +40,16 @@ Ce projet a pour objectif de démontrer :
 1. Cloner le projet :  
    ```bash
    git clone https://github.com/BELAILKaoutar/ecom_api_nosql_dotnet_10.git
+Installer les dépendances .NET :
+
+dotnet restore
+
+
+2. Lancer l’API :
+
+dotnet run
+
+
+3. Ouvrir Swagger pour tester les endpoints :
+
+http://localhost:5071/swagger/index.html
