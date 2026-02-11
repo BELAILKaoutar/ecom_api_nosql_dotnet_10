@@ -23,6 +23,7 @@
 ### **Endpoints exposés**
 - **Clients** : `/api/Customers`
 - **Commandes** : `/api/Orders`
+- **Products** : `/api/Products`
 
 ---
 
