@@ -45,9 +45,9 @@ Ce projet a pour objectif de démontrer :
    ```dotnet restore
 
 
-2. Lancer l’API :
+3. Lancer l’API :
 
-  ```dotnet run
+   ```dotnet run
 
 
 4. Ouvrir Swagger pour tester les endpoints :
