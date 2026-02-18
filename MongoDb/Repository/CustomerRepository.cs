@@ -1,4 +1,5 @@
-﻿using ecom_api_nosql_.Models;
+﻿using ecom_api_nosql_.Common.Pagination;
+using ecom_api_nosql_.Models;
 using ecom_api_nosql_.MongoDb.Interface;
 using ecom_api_nosql_.Settings;
 using Microsoft.Extensions.Options;
@@ -6,76 +7,63 @@ using MongoDB.Driver;
 
 namespace ecom_api_nosql_.MongoDb.Repository;
 
-/// <summary>
-/// Repository implementation for Customer operations
-/// </summary>
 public class CustomerRepository : ICustomerRepository
 {
     private readonly IMongoCollection<Customer> _customersCollection;
 
-    public CustomerRepository(
-        IMongoClientFactory mongoClientFactory,
-        IOptions<MongoDbConfiguration> options)
+    public CustomerRepository(IMongoClientFactory mongoClientFactory, IOptions<MongoDbConfiguration> options)
     {
         var collectionName = options.Value.Collections?["Customers"] ?? "Customers";
         _customersCollection = mongoClientFactory.GetMongoCollection<Customer>(collectionName);
     }
 
-    /// <inheritdoc />
     public async Task<List<Customer>> GetAllAsync()
-    {
-        return await _customersCollection
-            .Find(_ => true)
-            .ToListAsync()
-            .ConfigureAwait(false);
-    }
+        => await _customersCollection.Find(_ => true).ToListAsync();
 
-    /// <inheritdoc />
     public async Task<Customer?> GetByIdAsync(string id)
-    {
-        return await _customersCollection
-            .Find(c => c.Id == id)
-            .FirstOrDefaultAsync()
-            .ConfigureAwait(false);
-    }
+        => await _customersCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
-    /// <inheritdoc />
     public async Task<Customer> CreateAsync(Customer customer)
     {
-        await _customersCollection
-            .InsertOneAsync(customer)
-            .ConfigureAwait(false);
-
+        customer.DateCreation = DateTime.UtcNow;
+        await _customersCollection.InsertOneAsync(customer);
         return customer;
     }
 
-    /// <inheritdoc />
-    public async Task<bool> UpdateAsync(string id, Customer customer)
+    public async Task<Customer?> UpdateAsync(string id, Customer customer)
     {
-        var result = await _customersCollection
-            .ReplaceOneAsync(c => c.Id == id, customer)
-            .ConfigureAwait(false);
-
-        return result.ModifiedCount > 0;
+        var result = await _customersCollection.ReplaceOneAsync(x => x.Id == id, customer);
+        if (result.ModifiedCount == 0) return null;
+        return customer;
     }
 
-    /// <inheritdoc />
     public async Task<bool> DeleteAsync(string id)
     {
-        var result = await _customersCollection
-            .DeleteOneAsync(c => c.Id == id)
-            .ConfigureAwait(false);
-
+        var result = await _customersCollection.DeleteOneAsync(x => x.Id == id);
         return result.DeletedCount > 0;
     }
 
-    /// <inheritdoc />
-    public async Task<bool> ExistsAsync(string id)
+    // ✅ Pagination
+    public async Task<PagedResult<Customer>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var count = await _customersCollection
-            .CountDocumentsAsync(c => c.Id == id)
-            .ConfigureAwait(false);
+        query.Normalize();
 
-        return count > 0;
+        var filter = Builders<Customer>.Filter.Empty;
+
+        var total = await _customersCollection.CountDocumentsAsync(filter, cancellationToken: ct);
+
+        var items = await _customersCollection.Find(filter)
+            .SortByDescending(x => x.DateCreation)
+            .Skip(query.Skip)
+            .Limit(query.PageSize)
+            .ToListAsync(ct);
+
+        return new PagedResult<Customer>
+        {
+            Items = items,
+            TotalCount = total,
+            Page = query.Page,
+            PageSize = query.PageSize
+        };
     }
 }

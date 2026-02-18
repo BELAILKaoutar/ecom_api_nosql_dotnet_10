@@ -1,47 +1,26 @@
-﻿using ecom_api_nosql_.Models;
+﻿using ecom_api_nosql_.Common.Pagination;
+using ecom_api_nosql_.Models;
 using ecom_api_nosql_.MongoDb.Interface;
 using ecom_api_nosql_.Services.Interface;
 
-namespace ecom_api_nosql_.Services
+namespace ecom_api_nosql_.Services;
+
+public class CustomerService : ICustomerService
 {
-    public class CustomerService : ICustomerService
+    private readonly ICustomerRepository _repo;
+
+    public CustomerService(ICustomerRepository repo)
     {
-        private readonly ICustomerRepository _customerRepository;
-
-        public CustomerService(ICustomerRepository customerRepository)
-        {
-            _customerRepository = customerRepository;
-        }
-
-        public async Task<List<Customer>> GetAllAsync()
-        {
-            return await _customerRepository.GetAllAsync();
-        }
-
-        public async Task<Customer?> GetByIdAsync(string id)
-        {
-            return await _customerRepository.GetByIdAsync(id);
-        }
-
-        public async Task<Customer> CreateAsync(Customer customer)
-        {
-            customer.DateCreation = DateTime.UtcNow;
-            return await _customerRepository.CreateAsync(customer);
-        }
-
-        public async Task<Customer?> UpdateAsync(string id, Customer customer)
-        {
-            var exists = await _customerRepository.ExistsAsync(id);
-            if (!exists) return null;
-
-            customer.Id = id;
-            var updated = await _customerRepository.UpdateAsync(id, customer);
-            return updated ? customer : null;
-        }
-
-        public async Task<bool> DeleteAsync(string id)
-        {
-            return await _customerRepository.DeleteAsync(id);
-        }
+        _repo = repo;
     }
+
+    public Task<List<Customer>> GetAllAsync() => _repo.GetAllAsync();
+    public Task<Customer?> GetByIdAsync(string id) => _repo.GetByIdAsync(id);
+    public Task<Customer> CreateAsync(Customer customer) => _repo.CreateAsync(customer);
+    public Task<Customer?> UpdateAsync(string id, Customer customer) => _repo.UpdateAsync(id, customer);
+    public Task<bool> DeleteAsync(string id) => _repo.DeleteAsync(id);
+
+    // ✅ Pagination
+    public Task<PagedResult<Customer>> GetPagedAsync(PagedQuery query)
+        => _repo.GetPagedAsync(query);
 }

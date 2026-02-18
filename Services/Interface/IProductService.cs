@@ -1,3 +1,4 @@
+using ecom_api_nosql_.Common.Pagination;
 using ecom_api_nosql_.Models;
 
 namespace ecom_api_nosql_.Services.Interface;
@@ -48,4 +49,7 @@ public interface IProductService
     /// <param name="id">Product ID</param>
     /// <returns>True if deletion was successful, false otherwise</returns>
     Task<bool> DeleteProductAsync(string id);
+
+    Task<PagedResult<Product>> GetPagedAsync(PagedQuery query);
+
 }

@@ -1,6 +1,8 @@
 ﻿using ecom_api_nosql_.Models;
 using ecom_api_nosql_.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using ecom_api_nosql_.Common.Pagination;
+using ecom_api_nosql_.Common.Exceptions;
 
 namespace ecom_api_nosql_.Controllers;
 
@@ -10,25 +12,23 @@ namespace ecom_api_nosql_.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
-    private readonly ILogger<OrdersController> _logger;
 
-    public OrdersController(IOrderService orderService, ILogger<OrdersController> logger)
+    public OrdersController(IOrderService orderService)
     {
         _orderService = orderService;
-        _logger = logger;
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Order>>> GetAll()
-    {
-        return Ok(await _orderService.GetAllAsync());
-    }
+    public async Task<ActionResult<PagedResult<Order>>> GetAll([FromQuery] PagedQuery query)
+        => Ok(await _orderService.GetPagedAsync(query));
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Order>> GetById(string id)
     {
         var order = await _orderService.GetByIdAsync(id);
-        if (order == null) return NotFound($"Order with ID {id} not found");
+        if (order == null)
+            throw new NotFoundException($"Order with ID {id} not found");
+
         return Ok(order);
     }
 
@@ -43,7 +43,9 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<Order>> UpdateStatut(string id, [FromBody] string statut)
     {
         var updatedOrder = await _orderService.UpdateStatutAsync(id, statut);
-        if (updatedOrder == null) return NotFound($"Order with ID {id} not found");
+        if (updatedOrder == null)
+            throw new NotFoundException($"Order with ID {id} not found");
+
         return Ok(updatedOrder);
     }
 
@@ -51,7 +53,9 @@ public class OrdersController : ControllerBase
     public async Task<IActionResult> Delete(string id)
     {
         var deleted = await _orderService.DeleteAsync(id);
-        if (!deleted) return NotFound($"Order with ID {id} not found");
+        if (!deleted)
+            throw new NotFoundException($"Order with ID {id} not found");
+
         return NoContent();
     }
 }

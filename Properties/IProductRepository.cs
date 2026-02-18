@@ -1,4 +1,5 @@
 using ecom_api_nosql_.Models;
+using ecom_api_nosql_.Common.Pagination;
 
 namespace ecom_api_nosql_.MongoDb.Interface;
 
@@ -55,4 +56,7 @@ public interface IProductRepository
     /// <param name="id">Product ID</param>
     /// <returns>True if product exists, false otherwise</returns>
     Task<bool> ExistsAsync(string id);
+
+    Task<PagedResult<Product>> GetPagedAsync(PagedQuery query, CancellationToken ct = default);
+
 }

@@ -1,6 +1,8 @@
 ﻿using ecom_api_nosql_.Models;
 using ecom_api_nosql_.Services.Interface;
 using Microsoft.AspNetCore.Mvc;
+using ecom_api_nosql_.Common.Pagination;
+using ecom_api_nosql_.Common.Exceptions;
 
 namespace ecom_api_nosql_.Controllers;
 
@@ -10,42 +12,50 @@ namespace ecom_api_nosql_.Controllers;
 public class CustomersController : ControllerBase
 {
     private readonly ICustomerService _service;
-    private readonly ILogger<CustomersController> _logger;
 
-    public CustomersController(
-        ICustomerService service,
-        ILogger<CustomersController> logger)
+    public CustomersController(ICustomerService service)
     {
         _service = service;
-        _logger = logger;
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Customer>>> GetAll()
-        => Ok(await _service.GetAllAsync());
+    public async Task<ActionResult<PagedResult<Customer>>> GetAll([FromQuery] PagedQuery query)
+        => Ok(await _service.GetPagedAsync(query));
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Customer>> GetById(string id)
     {
         var customer = await _service.GetByIdAsync(id);
-        return customer == null ? NotFound() : Ok(customer);
+        if (customer == null)
+            throw new NotFoundException($"Customer with ID {id} not found");
+
+        return Ok(customer);
     }
 
     [HttpPost]
-    public async Task<ActionResult<Customer>> Create(Customer customer)
+    public async Task<ActionResult<Customer>> Create([FromBody] Customer customer)
     {
         var created = await _service.CreateAsync(customer);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Customer>> Update(string id, Customer customer)
+    public async Task<ActionResult<Customer>> Update(string id, [FromBody] Customer customer)
     {
         var updated = await _service.UpdateAsync(id, customer);
-        return updated == null ? NotFound() : Ok(updated);
+        if (updated == null)
+            throw new NotFoundException($"Customer with ID {id} not found");
+
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
-        => await _service.DeleteAsync(id) ? NoContent() : NotFound();
+    {
+        var deleted = await _service.DeleteAsync(id);
+        if (!deleted)
+            throw new NotFoundException($"Customer with ID {id} not found");
+
+        return NoContent();
+    }
 }

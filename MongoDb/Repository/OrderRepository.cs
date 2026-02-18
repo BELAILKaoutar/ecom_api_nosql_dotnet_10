@@ -1,4 +1,5 @@
-﻿using ecom_api_nosql_.Models;
+﻿using ecom_api_nosql_.Common.Pagination;
+using ecom_api_nosql_.Models;
 using ecom_api_nosql_.MongoDb.Interface;
 using ecom_api_nosql_.Settings;
 using Microsoft.Extensions.Options;
@@ -17,42 +18,53 @@ public class OrderRepository : IOrderRepository
     }
 
     public async Task<List<Order>> GetAllAsync()
-    {
-        return await _ordersCollection.Find(_ => true).ToListAsync();
-    }
+        => await _ordersCollection.Find(_ => true).ToListAsync();
 
     public async Task<Order?> GetByIdAsync(string id)
-    {
-        return await _ordersCollection.Find(o => o.Id == id).FirstOrDefaultAsync();
-    }
-
-    public async Task<List<Order>> GetByCustomerIdAsync(string customerId)
-    {
-        return await _ordersCollection.Find(o => o.CustomerId == customerId).ToListAsync();
-    }
+        => await _ordersCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
 
     public async Task<Order> CreateAsync(Order order)
     {
+        order.DateCommande = DateTime.UtcNow;
         await _ordersCollection.InsertOneAsync(order);
         return order;
     }
 
-    public async Task<bool> UpdateAsync(string id, Order order)
+    public async Task<Order?> UpdateStatutAsync(string id, string statut)
     {
-        var result = await _ordersCollection.ReplaceOneAsync(o => o.Id == id, order);
-        return result.ModifiedCount > 0;
+        var update = Builders<Order>.Update.Set(x => x.Statut, statut);
+        var result = await _ordersCollection.UpdateOneAsync(x => x.Id == id, update);
+        if (result.ModifiedCount == 0) return null;
+        return await GetByIdAsync(id);
     }
-
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var result = await _ordersCollection.DeleteOneAsync(o => o.Id == id);
+        var result = await _ordersCollection.DeleteOneAsync(x => x.Id == id);
         return result.DeletedCount > 0;
     }
 
-    public async Task<bool> ExistsAsync(string id)
+    // ✅ Pagination
+    public async Task<PagedResult<Order>> GetPagedAsync(PagedQuery query, CancellationToken ct = default)
     {
-        var count = await _ordersCollection.CountDocumentsAsync(o => o.Id == id);
-        return count > 0;
+        query.Normalize();
+
+        var filter = Builders<Order>.Filter.Empty;
+
+        var total = await _ordersCollection.CountDocumentsAsync(filter, cancellationToken: ct);
+
+        var items = await _ordersCollection.Find(filter)
+            .SortByDescending(x => x.DateCommande)
+            .Skip(query.Skip)
+            .Limit(query.PageSize)
+            .ToListAsync(ct);
+
+        return new PagedResult<Order>
+        {
+            Items = items,
+            TotalCount = total,
+            Page = query.Page,
+            PageSize = query.PageSize
+        };
     }
 }

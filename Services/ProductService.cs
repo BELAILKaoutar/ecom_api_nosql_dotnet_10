@@ -1,6 +1,7 @@
 using ecom_api_nosql_.Models;
 using ecom_api_nosql_.MongoDb.Interface;
 using ecom_api_nosql_.Services.Interface;
+using ecom_api_nosql_.Common.Pagination;
 
 namespace ecom_api_nosql_.Services;
 
@@ -163,4 +164,8 @@ public class ProductService : IProductService
             throw new ArgumentException("Product stock cannot be negative", nameof(product.Stock));
         }
     }
+    public Task<PagedResult<Product>> GetPagedAsync(PagedQuery query)
+    => _productRepository.GetPagedAsync(query);
+
+
 }
